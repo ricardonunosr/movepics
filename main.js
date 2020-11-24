@@ -1,9 +1,10 @@
 const path = require('path');
 const fs = require('fs');
-const util = require('util');
 const mkdirp = require('mkdirp');
 var mv = require('mv');
-const exec = util.promisify(require('child_process').exec);
+const util = require('util');
+const spawn = require('child_process').spawn;
+const readdir = util.promisify(fs.readdir);
 
 const directoryPath = path.join('D:\\Test');
 const saveDirectory = `D:\\Test Org`;
@@ -26,40 +27,59 @@ const getDateOfCreation = async (fileName, data) => {
   }
 };
 
-fs.readdir(directoryPath, (err, files) => {
-  if (err) return console.log('Unable to scan directory: ' + err);
-
-  files.forEach(async (file) => {
-    await exec(
-      `exiftool -json "${directoryPath}\\${file}"`,
-      async (err, data) => {
-        const creationDate = await getDateOfCreation(file, data);
-        if (creationDate !== undefined) {
-          let year = new Date(creationDate.split(' ')[0]).getFullYear();
-          mkdirp(`${saveDirectory}/${year}`).then((_) => {
-            mv(
-              `${directoryPath}/${file}`,
-              `${saveDirectory}/${year}/${file}`,
-              (err) => {
-                if (err) throw err;
-                console.log(`Moved Photo to ${year}`);
-              }
-            );
-          });
-        } else {
-          console.log('Sem data');
-          mkdirp(`${saveDirectory}/Sem Data`).then((_) => {
-            mv(
-              `${directoryPath}/${file}`,
-              `${saveDirectory}/Sem Data/${file}`,
-              (err) => {
-                if (err) throw err;
-                console.log(`Moved Photo to Sem Data`);
-              }
-            );
-          });
+const MainFunction = async () => {
+  const files = await readdir(directoryPath);
+  var i = 0;
+  var numberOfProcesses = 0;
+  const MAX_PROCESSES = 5;
+  const runMore = async () => {
+    while (i < files.length && numberOfProcesses < MAX_PROCESSES) {
+      ++numberOfProcesses;
+      var file = files[i];
+      const imageProcess = spawn(
+        'exiftool.exe',
+        ['-json', `"${directoryPath}/${file}"`],
+        {
+          shell: true,
         }
-      }
-    );
-  });
-});
+      );
+
+      imageProcess.stdout.on('data', async (data) => {
+        const creationDate = await getDateOfCreation(file, data.toString());
+        let folder;
+        if (creationDate !== undefined) {
+          folder = new Date(creationDate.split(' ')[0]).getFullYear();
+        } else {
+          folder = 'Sem Data';
+        }
+        mkdirp(`${saveDirectory}/${folder}`).then((_) => {
+          mv(
+            `${directoryPath}/${file}`,
+            `${saveDirectory}/${folder}/${file}`,
+            (err) => {
+              if (err) throw err;
+              console.log(`Moved Photo to ${folder}`);
+            }
+          );
+        });
+      });
+
+      imageProcess
+        .on('close', (code) => {
+          i++;
+          --numberOfProcesses;
+          console.log(`Finished with code ${code}`);
+          runMore();
+        })
+        .on('error', (err) => {
+          i++;
+          console.error(err);
+          --numberOfProcesses;
+          runMore();
+        });
+    }
+  };
+  runMore();
+};
+
+MainFunction();
