@@ -1,11 +1,17 @@
 # 📷 MovePics
 
-Script to organize photos into their years. Utilizes metadata from the pictures to organize them. To get the metadata is utilized the exiftool.
+Script and desktop app to organize photos into their years. Utilizes metadata from the pictures to organize them. To get the metadata is utilized the exiftool.
+
+## ✨ Preview (Under Contruction 🚧)
+
+![Preview](https://i.imgur.com/svMrmfv.png)
 
 ## 🚀 Tecnologies Used:
 
 - [ExifTool](https://exiftool.org/)
 - [Node](https://nodejs.org/en/)
+- [Electron](https://www.electronjs.org/)
+- [Yarn Workspaces](https://classic.yarnpkg.com/en/docs/workspaces/)
 
 ## 🔨 How to get Started
 
