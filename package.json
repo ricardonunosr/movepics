@@ -1,7 +1,9 @@
 {
   "private": "true",
-  "workspaces": [
-    "client",
-    "script"
-  ]
+  "workspaces": {
+    "packages": [
+      "client",
+      "script"
+    ]
+  }
 }

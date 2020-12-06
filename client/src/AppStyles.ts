@@ -33,6 +33,7 @@ export const StartButton = styled(Button)`
   font-size: 48px;
   width: auto;
   text-align: center;
+  color: black;
 `;
 
 export const WindowControls = styled.div`
@@ -131,4 +132,8 @@ export const Toogle = styled.input`
       transition: 0.2s;
     }
   }
+`;
+
+export const ErrorMessage = styled.p`
+  color: red;
 `;

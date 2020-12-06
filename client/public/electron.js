@@ -1,6 +1,6 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
-const isDev = require('electron-is-dev');
 const path = require('path');
+const { format } = require('url');
 const { organizeFiles } = require('@movepics/script');
 
 let mainWindow;
@@ -14,17 +14,21 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: true,
       enableRemoteModule: true,
-      preload: __dirname + '/preload.js',
+      preload: path.join(__dirname, 'preload.js'),
     },
   });
   mainWindow.setResizable(false);
   mainWindow.setMenuBarVisibility(false);
-  const startURL = isDev
-    ? 'http://localhost:3000'
-    : `file://${path.join(__dirname, '../build/index.html')}`;
-  mainWindow.loadURL(startURL);
 
-  mainWindow.webContents.openDevTools();
+  const startURL =
+    process.env.NODE_ENV === 'development'
+      ? 'http://localhost:3000'
+      : format({
+          pathname: path.join(__dirname, '/../build/index.html'),
+          protocol: 'file:',
+          slashes: true,
+        });
+  mainWindow.loadURL(startURL);
 
   mainWindow.on('closed', function () {
     mainWindow = null;

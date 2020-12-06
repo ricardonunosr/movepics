@@ -1,11 +1,11 @@
 {
   "name": "@movepics/script",
   "version": "1.0.0",
+  "main": "index.js",
   "scripts": {
-    "start": "node main.js"
+    "start": "node index.js"
   },
   "dependencies": {
-    "bluebird": "^3.7.2",
     "cp-file": "^9.0.0",
     "mkdirp": "^1.0.4",
     "mv": "^2.1.1"
